@@ -1,0 +1,823 @@
+{
+  "name": "Sistema Automatizado de Citas Médicas - Sprint 1",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Sprint 1 & 2: Flujo Principal de Reserva\n\nHU-01: Nueva Solicitud (Google Forms → Sheet)\nHU-02: Validar Disponibilidad\nHU-03: Validar Duplicidad\nIF: ¿Validación OK?\nHU-04: Registrar Cita (ID)\nHU-05: Enviar Confirmación\nHU-10: Registrar Fallo",
+        "height": 192,
+        "width": 360
+      },
+      "id": "c204c6ec-eb32-4e2a-a719-35c7aea35f61",
+      "name": "Sprint 1 & 2: Flujo Principal de Reserva",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7600,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "sheetId": "1DobZEGr8XwqLlhtR3bu_byVvYoZHM4U4DXWQYtE_WaA",
+        "range": "A:H",
+        "dataStartRow": 2,
+        "options": {
+          "continue": true
+        }
+      },
+      "id": "7798819c-da2c-467a-b767-0fc4461a752e",
+      "name": "HU-02: Validar Disponibilidad",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        7408,
+        2208
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e5n61HxGVZz7lqC1",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Google Sheets → lee la hoja CitasConfirmadas.\nUsa Operation = Get Row(s) / Read Rows.\n\nIdea: filtrar por Fecha de cita (y si quieres por Especialidad) para obtener posibles choques de horario.\nEn el IF se revisa si hay filas o no."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Confirmación de tu cita médica",
+        "includeHtml": true,
+        "htmlMessage": "={{ `<html>   <body style=\"margin:0;padding:0;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;\">     <table align=\"center\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e0e3e7;\">       <tr>         <td style=\"background-color:#2563eb;padding:16px 24px;color:#ffffff;\">           <h1 style=\"margin:0;font-size:20px;font-weight:600;\">             Confirmación de cita médica           </h1>           <p style=\"margin:4px 0 0;font-size:13px;opacity:0.9;\">             Gracias por confiar en nuestro centro de salud.           </p>         </td>       </tr>        <tr>         <td style=\"padding:20px 24px;\">           <p style=\"margin:0 0 12px;font-size:14px;color:#111827;\">             Hola <strong>${$json[\"Nombres y apellidos completos\"]}</strong>,           </p>           <p style=\"margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.5;\">             Tu solicitud ha sido <strong>confirmada</strong>. A continuación te compartimos el resumen de tu cita:           </p>            <table cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;font-size:14px;color:#111827;border-collapse:collapse;\">             <tr>               <td style=\"padding:6px 0;font-weight:600;width:130px;color:#4b5563;\">Especialidad:</td>               <td style=\"padding:6px 0;\">${$json[\"Especialidad médica solicitada\"]}</td>             </tr>             <tr>               <td style=\"padding:6px 0;font-weight:600;color:#4b5563;\">Fecha:</td>               <td style=\"padding:6px 0;\">${$json[\"Fecha preferida para la cita\"]}</td>             </tr>             <tr>               <td style=\"padding:6px 0;font-weight:600;color:#4b5563;\">Hora:</td>               <td style=\"padding:6px 0;\">${$json[\"Hora preferida para la cita\"]}</td>             </tr>           </table>            <div style=\"margin:18px 0 10px;padding:12px 14px;background-color:#eff6ff;border-radius:6px;border:1px solid #dbeafe;font-size:13px;color:#1e3a8a;line-height:1.4;\">             <strong>Recomendación:</strong><br/>             Te sugerimos llegar al centro médico con <strong>10 minutos de anticipación</strong> y llevar tu documento de identidad.           </div>            <p style=\"margin:18px 0 4px;font-size:13px;color:#6b7280;line-height:1.5;\">             Si necesitas reprogramar o cancelar tu cita, por favor contáctanos a través de nuestros canales oficiales.           </p>            <p style=\"margin:0;font-size:13px;color:#6b7280;\">             Atentamente,<br/>             <span style=\"font-weight:600;color:#111827;\">Centro de Salud</span>           </p>         </td>       </tr>        <tr>         <td style=\"background-color:#f9fafb;padding:10px 24px;text-align:center;font-size:11px;color:#9ca3af;\">           Este es un mensaje automático, por favor no respondas a este correo.         </td>       </tr>     </table>   </body> </html>` }}",
+        "message": "={}",
+        "toList": [
+          "={{ $json['Correo electrónico'] }}"
+        ],
+        "additionalFields": {}
+      },
+      "id": "8f1fd57e-d300-4ee9-8653-fe1c388a53aa",
+      "name": "HU-05: Enviar Confirmación",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        8528,
+        2064
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OVGOsDJeYCb7YBTB",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "Nodo Gmail para enviar el correo de confirmación.\n\nConfigura:\n• Credenciales Gmail\n• To = {{ $json[\"correo\"] }}\n• Subject = \"Confirmación de tu cita médica\"\n• Body: incluye nombre, especialidad, fecha_cita, hora_cita e id_cita."
+    },
+    {
+      "parameters": {
+        "jsCode": "// === HELPERS ===\n\n// Normaliza fecha a DD/MM/YYYY\nfunction normalizeDate(dateValue) {\n  if (!dateValue) return '';\n\n  // Número (serial de Google Sheets)\n  if (typeof dateValue === 'number') {\n    const epoch = new Date(1899, 11, 30);\n    const days = Math.floor(dateValue);\n    const date = new Date(epoch.getTime() + days * 24 * 60 * 60 * 1000);\n\n    const day = String(date.getDate()).padStart(2, '0');\n    const month = String(date.getMonth() + 1).padStart(2, '0');\n    const year = date.getFullYear();\n\n    return `${day}/${month}/${year}`;\n  }\n\n  // String\n  const str = String(dateValue).trim();\n\n  // ISO: 2025-12-29\n  let m = str.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);\n  if (m) {\n    const year = m[1];\n    const month = m[2];\n    const day = m[3];\n    return `${day}/${month}/${year}`;\n  }\n\n  // d/m/yyyy o dd/mm/yyyy o con guiones\n  m = str.match(/^(\\d{1,2})[\\/\\-](\\d{1,2})[\\/\\-](\\d{4})$/);\n  if (m) {\n    const day = m[1].padStart(2, '0');\n    const month = m[2].padStart(2, '0');\n    const year = m[3];\n    return `${day}/${month}/${year}`;\n  }\n\n  return str;\n}\n\n// Normaliza hora a HH:MM (24h)\nfunction normalizeTime(timeValue) {\n  if (!timeValue) return '';\n\n  if (typeof timeValue === 'number') {\n    const totalMinutes = Math.round(timeValue * 24 * 60);\n    const hours = Math.floor(totalMinutes / 60);\n    const minutes = totalMinutes % 60;\n    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;\n  }\n\n  const timeStr = String(timeValue).trim().toLowerCase();\n  const match = timeStr.match(/(\\d{1,2}):(\\d{2})(?::(\\d{2}))?\\s*(a\\.?m\\.?|p\\.?m\\.?)?/);\n\n  if (!match) return timeStr;\n\n  let hours = parseInt(match[1], 10);\n  const minutes = match[2];\n  const period = match[4];\n\n  if (period) {\n    if (period.startsWith('p') && hours !== 12) {\n      hours += 12;\n    } else if (period.startsWith('a') && hours === 12) {\n      hours = 0;\n    }\n  }\n\n  return `${String(hours).padStart(2, '0')}:${minutes}`;\n}\n\n// DNI como string recortado\nfunction normalizeDNI(dni) {\n  if (dni === null || dni === undefined) return '';\n  return String(dni).trim();\n}\n\n// ¿Tiene datos reales?\nfunction hasMeaningfulData(obj) {\n  if (!obj || typeof obj !== 'object') return false;\n  const values = Object.values(obj);\n  return values.some(value => {\n    if (value === null || value === undefined || value === '') return false;\n    if (typeof value === 'string' && value.trim() === '') return false;\n    return true;\n  });\n}\n\n// === NUEVA CITA ===\n\nconst newAppointment = $('Filtrar No Procesadas').first().json;\nconst fechaSolicitada = normalizeDate(newAppointment['Fecha preferida para la cita']);\nconst horaSolicitada = normalizeTime(newAppointment['Hora preferida para la cita']);\nconst especialidadSolicitada = newAppointment['Especialidad médica solicitada'];\nconst dniSolicitado = normalizeDNI(newAppointment['DNI']);\n\n// === CITAS EXISTENTES ===\n\nconst existingAppointments = $('HU-02: Validar Disponibilidad').all() || [];\n\n// Filtrar solo citas confirmadas con datos reales\nconst meaningfulAppointments = existingAppointments.filter(item => {\n  if (!hasMeaningfulData(item.json)) return false;\n\n  const estado = String(item.json['Estado'] || '').trim().toLowerCase();\n  return estado === 'confirmada';\n});\n\n// Si no hay citas confirmadas, no hay conflicto\nif (meaningfulAppointments.length === 0) {\n  return [{\n    json: {\n      ...newAppointment,\n      conflictos_disponibilidad: 0,\n      conflictos_duplicidad: 0\n    }\n  }];\n}\n\n// === BUSCAR CONFLICTOS DE DISPONIBILIDAD ===\n// (MISMA fecha + MISMA hora + MISMA especialidad, sin importar DNI)\nconst conflictosDisponibilidad = meaningfulAppointments.filter(item => {\n  const appointment = item.json;\n\n  if (!appointment['Fecha preferida para la cita'] ||\n      !appointment['Hora preferida para la cita'] ||\n      !appointment['Especialidad médica solicitada']) {\n    return false;\n  }\n\n  const existingDate = normalizeDate(appointment['Fecha preferida para la cita']);\n  const existingTime = normalizeTime(appointment['Hora preferida para la cita']);\n  const existingSpecialty = appointment['Especialidad médica solicitada'];\n\n  const sameDate = existingDate === fechaSolicitada;\n  const sameTime = existingTime === horaSolicitada;\n  const sameSpecialty = existingSpecialty === especialidadSolicitada;\n\n  return sameDate && sameTime && sameSpecialty;\n});\n\n// === BUSCAR CONFLICTOS DE DUPLICIDAD ===\n// (MISMO DNI + MISMA fecha + MISMA hora + MISMA especialidad)\nconst conflictosDuplicidad = meaningfulAppointments.filter(item => {\n  const appointment = item.json;\n\n  if (!appointment['Fecha preferida para la cita'] ||\n      !appointment['Hora preferida para la cita'] ||\n      !appointment['Especialidad médica solicitada'] ||\n      !appointment['DNI']) {\n    return false;\n  }\n\n  const existingDate = normalizeDate(appointment['Fecha preferida para la cita']);\n  const existingTime = normalizeTime(appointment['Hora preferida para la cita']);\n  const existingSpecialty = appointment['Especialidad médica solicitada'];\n  const existingDNI = normalizeDNI(appointment['DNI']);\n\n  const sameDate = existingDate === fechaSolicitada;\n  const sameTime = existingTime === horaSolicitada;\n  const sameSpecialty = existingSpecialty === especialidadSolicitada;\n  const sameDNI = existingDNI === dniSolicitado;\n\n  return sameDate && sameTime && sameSpecialty && sameDNI;\n});\n\n// Devolver la nueva cita con ambos contadores de conflictos\nreturn [{\n  json: {\n    ...newAppointment,\n    conflictos_disponibilidad: conflictosDisponibilidad.length,\n    conflictos_duplicidad: conflictosDuplicidad.length\n  }\n}];\n"
+      },
+      "id": "a561175a-a9fb-4f57-8612-7cc65bffb7b4",
+      "name": "Filtrar Disponibilidad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7632,
+        2208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from the Filtrar No Procesadas node\nconst triggerData = $('Filtrar No Procesadas').first().json;\n\n// Prepare the data object for Google Sheets matching the exact column order:\n// Correo electrónico, Nombres y apellidos completos, DNI, Teléfono celular, \n// Especialidad médica solicitada, Fecha preferida para la cita, Hora preferida para la cita, Estado\nconst appointmentData = {\n  'Correo electrónico': triggerData['Correo electrónico'],\n  'Nombres y apellidos completos': triggerData['Nombres y apellidos completos'],\n  'DNI': triggerData['DNI'],\n  'Teléfono celular': triggerData['Teléfono celular'],\n  'Especialidad médica solicitada': triggerData['Especialidad médica solicitada'],\n  'Fecha preferida para la cita': triggerData['Fecha preferida para la cita'],\n  'Hora preferida para la cita': triggerData['Hora preferida para la cita'],\n  'Estado': 'Confirmada'\n};\n\n// Return the prepared data\nreturn [appointmentData];"
+      },
+      "id": "6a40aca0-281f-4c6e-8ace-66c2d47344c0",
+      "name": "Preparar Datos Cita",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8080,
+        2112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from the Filtrar No Procesadas node\nconst triggerData = $('Filtrar No Procesadas').first().json;\n\n// Get validation results from previous nodes\nconst disponibilidadData = $('Filtrar Disponibilidad').first().json;\n\n// Helper function to convert Google Sheets serial date to readable format\nfunction convertSerialDate(serial) {\n  if (!serial || typeof serial !== 'number') return serial;\n  \n  // Google Sheets epoch starts at December 30, 1899\n  const epoch = new Date(1899, 11, 30);\n  const days = Math.floor(serial);\n  const milliseconds = days * 24 * 60 * 60 * 1000;\n  const date = new Date(epoch.getTime() + milliseconds);\n  \n  // Format as YYYY-MM-DD\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, '0');\n  const day = String(date.getDate()).padStart(2, '0');\n  \n  return `${year}-${month}-${day}`;\n}\n\n// Helper function to convert Google Sheets serial time to readable format\nfunction convertSerialTime(serial) {\n  if (!serial || typeof serial !== 'number') return serial;\n  \n  // Time is stored as fraction of a day\n  const totalMinutes = Math.round(serial * 24 * 60);\n  const hours = Math.floor(totalMinutes / 60);\n  const minutes = totalMinutes % 60;\n  \n  // Format as HH:MM\n  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;\n}\n\n// Helper function to convert Google Sheets serial timestamp to ISO format\nfunction convertSerialTimestamp(serial) {\n  if (!serial || typeof serial !== 'number') return new Date().toISOString();\n  \n  // Google Sheets epoch starts at December 30, 1899\n  const epoch = new Date(1899, 11, 30);\n  const days = Math.floor(serial);\n  const timeFraction = serial - days;\n  const milliseconds = days * 24 * 60 * 60 * 1000 + timeFraction * 24 * 60 * 60 * 1000;\n  const date = new Date(epoch.getTime() + milliseconds);\n  \n  return date.toISOString();\n}\n\n// DEBUG: Log validation data to understand what's happening\nconsole.log('=== DEBUG: Preparar Log Fallo ===');\nconsole.log('disponibilidadData:', JSON.stringify(disponibilidadData, null, 2));\nconsole.log('conflictos_disponibilidad:', disponibilidadData.conflictos_disponibilidad);\nconsole.log('conflictos_duplicidad:', disponibilidadData.conflictos_duplicidad);\n\n// Determine failure reason based on validation results\nlet motivoFallo = '';\nlet debugInfo = [];\n\n// Check for duplicidad first (higher priority)\nif (disponibilidadData.conflictos_duplicidad && disponibilidadData.conflictos_duplicidad > 0) {\n  motivoFallo = 'Cita duplicada';\n  debugInfo.push(`Conflictos duplicidad: ${disponibilidadData.conflictos_duplicidad}`);\n} else if (disponibilidadData.conflictos_disponibilidad && disponibilidadData.conflictos_disponibilidad > 0) {\n  motivoFallo = 'Conflicto de horario';\n  debugInfo.push(`Conflictos disponibilidad: ${disponibilidadData.conflictos_disponibilidad}`);\n} else {\n  // If no conflicts found, this is an unexpected case\n  motivoFallo = 'Error de validación - Caso inesperado';\n  debugInfo.push('UNEXPECTED: Validation passed but IF went to FALSE branch');\n  debugInfo.push(`conflictos_disponibilidad = ${disponibilidadData.conflictos_disponibilidad}`);\n  debugInfo.push(`conflictos_duplicidad = ${disponibilidadData.conflictos_duplicidad}`);\n  console.error('UNEXPECTED CASE: Validation passed but reached failure branch!');\n  console.error('This should not happen - check IF node condition');\n}\n\nconsole.log('Motivo de fallo:', motivoFallo);\nconsole.log('Debug info:', debugInfo.join(' | '));\n\n// Prepare the failure log data matching the exact column order of LogFallos sheet:\n// Marca temporal, Correo electrónico, Nombres y apellidos completos, DNI, Teléfono celular, \n// Especialidad médica solicitada, Fecha preferida para la cita, Hora preferida para la cita, Motivo de fallo\nconst logData = {\n  'Marca temporal': convertSerialTimestamp(triggerData['Marca temporal']),\n  'Correo electrónico': triggerData['Correo electrónico'],\n  'Nombres y apellidos completos': triggerData['Nombres y apellidos completos'],\n  'DNI': triggerData['DNI'],\n  'Teléfono celular': triggerData['Teléfono celular'],\n  'Especialidad médica solicitada': triggerData['Especialidad médica solicitada'],\n  'Fecha preferida para la cita': convertSerialDate(triggerData['Fecha preferida para la cita']),\n  'Hora preferida para la cita': convertSerialTime(triggerData['Hora preferida para la cita']),\n  'Motivo de fallo': motivoFallo + (debugInfo.length > 0 ? ' [DEBUG: ' + debugInfo.join(' | ') + ']' : '')\n};\n\nreturn [logData];"
+      },
+      "id": "2986621b-a081-46cb-bf42-897c0cedc265",
+      "name": "Preparar Log Fallo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8080,
+        2352
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "77f831bb-9abb-4c67-844c-71fd5cc74ce7",
+      "name": "Schedule: Cada Minuto",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        6736,
+        2208
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/17vneqZ4snprxvk0SZhUljfETO91h_bw_h9RWL94lvAw/edit?resourcekey=&gid=1395081977#gid=1395081977",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1395081977,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17vneqZ4snprxvk0SZhUljfETO91h_bw_h9RWL94lvAw/edit#gid=1395081977"
+        },
+        "options": {}
+      },
+      "id": "fa6fb5ec-3674-49a6-8d83-fc8bdb6333d3",
+      "name": "Leer Respuestas Formulario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        6960,
+        2208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e5n61HxGVZz7lqC1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tomar todas las filas del nodo anterior (Leer Respuestas Formulario)\nconst allRows = $input.all();\n\n// Filtrar filas donde 'Procesado' está vacío o no existe\nconst unprocessedRows = allRows.filter(item => {\n  // Asegurarnos de que item.json es un objeto\n  if (!item || typeof item.json !== 'object') {\n    return false;\n  }\n\n  const procesado = item.json['Procesado'];\n  // Consideramos \"pendiente\" cuando Procesado está vacío, null o no existe\n  return !procesado || procesado === '' || procesado === null;\n});\n\n// Devolver solo las filas NO procesadas\nreturn unprocessedRows;\n"
+      },
+      "id": "a9ab5695-c50d-4315-8138-19e174aa5169",
+      "name": "Filtrar No Procesadas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7184,
+        2208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('Filtrar Disponibilidad').item.json.conflictos_disponibilidad }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $('Filtrar Disponibilidad').item.json.conflictos_duplicidad }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3cb336ed-7af8-41d9-b526-5f36b2f063cf",
+      "name": "¿Validación OK?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7856,
+        2208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DobZEGr8XwqLlhtR3bu_byVvYoZHM4U4DXWQYtE_WaA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DobZEGr8XwqLlhtR3bu_byVvYoZHM4U4DXWQYtE_WaA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Correo electrónico",
+              "displayName": "Correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombres y apellidos completos",
+              "displayName": "Nombres y apellidos completos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Teléfono celular",
+              "displayName": "Teléfono celular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Especialidad médica solicitada",
+              "displayName": "Especialidad médica solicitada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha preferida para la cita",
+              "displayName": "Fecha preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora preferida para la cita",
+              "displayName": "Hora preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7db7cb6e-207b-42a9-b916-740f4463c800",
+      "name": "HU-04: Registrar Cita (ID)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        8304,
+        2112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e5n61HxGVZz7lqC1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1aSWMhk5_aSCJA9AydZNyvG_3pFu0c-SgrD6rVWiNnig"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aSWMhk5_aSCJA9AydZNyvG_3pFu0c-SgrD6rVWiNnig/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Marca temporal",
+              "displayName": "Marca temporal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Correo electrónico",
+              "displayName": "Correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombres y apellidos completos",
+              "displayName": "Nombres y apellidos completos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Teléfono celular",
+              "displayName": "Teléfono celular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Especialidad médica solicitada",
+              "displayName": "Especialidad médica solicitada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha preferida para la cita",
+              "displayName": "Fecha preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora preferida para la cita",
+              "displayName": "Hora preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Motivo de fallo",
+              "displayName": "Motivo de fallo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8ba22c11-d4d0-4804-b8c5-3b60e422413e",
+      "name": "HU-10: Registrar Fallo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        8304,
+        2352
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e5n61HxGVZz7lqC1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "17vneqZ4snprxvk0SZhUljfETO91h_bw_h9RWL94lvAw"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1395081977,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17vneqZ4snprxvk0SZhUljfETO91h_bw_h9RWL94lvAw/edit#gid=1395081977"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Procesado": "={{ $json.Procesado }}",
+            "row_number": "={{ $json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Marca temporal",
+              "displayName": "Marca temporal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Correo electrónico",
+              "displayName": "Correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Nombres y apellidos completos",
+              "displayName": "Nombres y apellidos completos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Teléfono celular",
+              "displayName": "Teléfono celular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Medio de contacto preferido",
+              "displayName": "Medio de contacto preferido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Especialidad médica solicitada",
+              "displayName": "Especialidad médica solicitada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Médico preferente (si aplica)",
+              "displayName": "Médico preferente (si aplica)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha preferida para la cita",
+              "displayName": "Fecha preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Hora preferida para la cita",
+              "displayName": "Hora preferida para la cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "¿Acepta disponibilidad en un horario cercano si el horario solicitado no está disponible?",
+              "displayName": "¿Acepta disponibilidad en un horario cercano si el horario solicitado no está disponible?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Motivo de la consulta (breve descripción)",
+              "displayName": "Motivo de la consulta (breve descripción)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Declaro que los datos proporcionados son correctos y autorizo el uso de esta información para la gestión de mi cita médica.",
+              "displayName": "Declaro que los datos proporcionados son correctos y autorizo el uso de esta información para la gestión de mi cita médica.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Autorizo el envío de correos electrónicos con la confirmación y recordatorios de mi cita médica.",
+              "displayName": "Autorizo el envío de correos electrónicos con la confirmación y recordatorios de mi cita médica.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Procesado",
+              "displayName": "Procesado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "166a7156-103e-4c45-9c8f-473ce44f465a",
+      "name": "Marcar Como Procesada",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8752,
+        2304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e5n61HxGVZz7lqC1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the row_number from the Filtrar No Procesadas node\nconst triggerData = $('Filtrar No Procesadas').first().json;\n\n// Return the data needed to mark the row as processed\nreturn [{\n  json: {\n    row_number: triggerData.row_number,\n    Procesado: 'SI'\n  }\n}];"
+      },
+      "id": "9bcf14a6-63ff-4a19-bcc3-7851ceee636f",
+      "name": "Preparar Datos Para Marcar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8528,
+        2304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HU-04: Registrar Cita (ID)": {
+      "main": [
+        [
+          {
+            "node": "HU-05: Enviar Confirmación",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar Datos Para Marcar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HU-02: Validar Disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "¿Validación OK?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Cita": {
+      "main": [
+        [
+          {
+            "node": "HU-04: Registrar Cita (ID)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Log Fallo": {
+      "main": [
+        [
+          {
+            "node": "HU-10: Registrar Fallo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: Cada Minuto": {
+      "main": [
+        [
+          {
+            "node": "Leer Respuestas Formulario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Respuestas Formulario": {
+      "main": [
+        [
+          {
+            "node": "Filtrar No Procesadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar No Procesadas": {
+      "main": [
+        [
+          {
+            "node": "HU-02: Validar Disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Validación OK?1": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Cita",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Log Fallo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HU-10: Registrar Fallo": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Para Marcar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Para Marcar": {
+      "main": [
+        [
+          {
+            "node": "Marcar Como Procesada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "86bf49b3-2f03-4766-a1f7-267b4fb2edce",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d08a25d50b175e39f90af83482889ee723bb15d3b1d0f45b38e3af69a794465d"
+  },
+  "id": "mEGCeZHZQSOY3Qo1",
+  "tags": []
+}

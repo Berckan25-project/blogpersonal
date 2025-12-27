@@ -1,4 +1,5 @@
 import ProjectCard from '../components/ProjectCard'
+import proyecto2 from '../data/SistemaAutomatizado.json'
 
 export default function Home() {
   return (
@@ -16,12 +17,16 @@ export default function Home() {
           tech="N8N, BPMN, MIRO, TRELLO"
           image="/images/estructura del proyecto.jpeg"
           video="/videos/videoT2.mp4"
+
         />
 
         <ProjectCard
           title="Proyecto 2"
-          description="API REST"
-          tech="Node.js, Express"
+          description={ <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {JSON.stringify(proyecto2, null, 2)}
+            </pre>
+          }
+          tech="N8N, Google Sheets, Gmail"
         />
       </div>
     </main>

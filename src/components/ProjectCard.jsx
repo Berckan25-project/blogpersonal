@@ -20,13 +20,12 @@ export default function ProjectCard({
         />
       )}
      
-      {video && (
-        <video
-          src={video}
-          controls
-          className="card-video"
-        />
-      )}
+      {Array.isArray(video) && video.map((src, i) => (
+        <video key={i} 
+        src={src} 
+        controls 
+        className="card-video" />
+      ))}
 
     </div>
   )

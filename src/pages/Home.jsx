@@ -15,8 +15,8 @@ export default function Home() {
           la disminución de errores administrativos y la mejora de la experiencia del paciente."
           tech="N8N, BPMN, MIRO, TRELLO"
           image="/images/estructura del proyecto.jpeg"
-          video="/videos/videoT2.mp4"
-
+          video={[ "/videos/videoT2.mp4", "/videos/videRetrospectiva.mkv", "/videos/videoFuncionamienton8n.mkv" ]}
+          
         />
 
         <ProjectCard

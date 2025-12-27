@@ -12,12 +12,14 @@ export default function ProjectCard({
       <p>{description}</p>
       <span className="tech">{tech}</span>
    
-      {image && (
-        <img
-          src={image}
-          alt={title}
-          className="card-image"
-        />
+      {Array.isArray(image) ? (
+        image.map((src, i) => (
+          <img key={i} src={src} alt={`${title} imagen ${i + 1}`} className="card-image" />
+        ))
+      ) : (
+        image && (
+          <img src={image} alt={title} className="card-image" />
+        )
       )}
      
       {Array.isArray(video) && video.map((src, i) => (

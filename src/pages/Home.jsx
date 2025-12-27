@@ -23,6 +23,7 @@ export default function Home() {
           title="Proyecto 2"
           description=""
           tech="N8N, Google Sheets, Gmail"
+          image="/images/n8nflujo.png"
         />
       </div>
     </main>

@@ -1,5 +1,4 @@
 import ProjectCard from '../components/ProjectCard'
-import proyecto2 from '../data/SistemaAutomatizado.json'
 
 export default function Home() {
   return (
@@ -22,10 +21,7 @@ export default function Home() {
 
         <ProjectCard
           title="Proyecto 2"
-          description={ <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              {JSON.stringify(proyecto2, null, 2)}
-            </pre>
-          }
+          description=""
           tech="N8N, Google Sheets, Gmail"
         />
       </div>
